@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="container">
+        <h1 class="mb-4">Our Products</h1>
+        
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <form method="get" class="row g-3">
+                    <div class="col-md-6">
+                        <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request.args.get('search', '') }}">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="Tops" {% if request.args.get('category') == 'Tops' %}selected{% endif %}>Tops</option>
+                            <option value="Bottoms" {% if request.args.get('category') == 'Bottoms' %}selected{% endif %}>Bottoms</option>
+                            <option value="Dresses" {% if request.args.get('category') == 'Dresses' %}selected{% endif %}>Dresses</option>
+                            <option value="Outerwear" {% if request.args.get('category') == 'Outerwear' %}selected{% endif %}>Outerwear</option>
+                            <option value="Shoes" {% if request.args.get('category') == 'Shoes' %}selected{% endif %}>Shoes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row g-4">
+            {% if products %}
+                {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card product-card shadow-sm h-100">
+                        <div class="product-image bg-light position-relative overflow-hidden">
+                            <img src="{{ product.image_url or '/static/images/placeholder.png' }}" class="card-img-top" alt="{{ product.name }}">
+                            <div class="overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-primary">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">{{ product.name }}</h5>
+                            <p class="card-text text-muted small">{{ product.brand }}</p>
+                            <p class="card-text text-truncate">{{ product.description }}</p>
+                            <p class="text-success">Stock: {{ product.stock }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 mb-0 text-primary">${{ "%.2f"|format(product.price) }}</span>
+                                <button class="btn btn-sm btn-outline-primary add-to-cart" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <h3>No products found</h3>
+                    <p class="text-muted">Try adjusting your search or filters</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Fashion Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    {% if product %}
+    <div class="row">
+        <div class="col-md-5">
+            <div class="product-image bg-light p-4 rounded">
+                <img src="{{ product.image_url or '/static/images/placeholder.png' }}" class="img-fluid" alt="{{ product.name }}">
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h1 class="mb-2">{{ product.name }}</h1>
+            <p class="text-muted mb-3">Brand: <strong>{{ product.brand }}</strong></p>
+            <p class="text-muted mb-3">Category: <strong>{{ product.category }}</strong></p>
+            
+            <h2 class="text-primary mb-3">${{ "%.2f"|format(product.price) }}</h2>
+            
+            <p class="mb-4">{{ product.description }}</p>
+            
+            {% if product.sizes %}
+            <div class="mb-4">
+                <label class="form-label">Size:</label>
+                <select id="size" class="form-select">
+                    <option value="">Select Size</option>
+                    {% for size in product.sizes.split(',') %}
+                    <option value="{{ size.strip() }}">{{ size.strip() }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            {% if product.colors %}
+            <div class="mb-4">
+                <label class="form-label">Color:</label>
+                <select id="color" class="form-select">
+                    <option value="">Select Color</option>
+                    {% for color in product.colors.split(',') %}
+                    <option value="{{ color.strip() }}">{{ color.strip() }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            <div class="mb-4">
+                <label class="form-label">Quantity:</label>
+                <input type="number" id="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
+            </div>
+            
+            <p class="mb-4"><strong>Stock Available: </strong><span class="text-success">{{ product.stock }} items</span></p>
+            
+            <div class="d-flex gap-2 mb-4">
+                <button class="btn btn-primary btn-lg flex-grow-1 add-to-cart" data-product-id="{{ product.id }}">
+                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                </button>
+                <button class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Free shipping on orders over $50
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger">Product not found</div>
+    {% endif %}
+</div>
+
+<script>
+document.querySelector('.add-to-cart').addEventListener('click', function() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const productId = this.dataset.productId;
+    
+    fetch('/add-to-cart', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({product_id: productId, quantity: quantity})
+    }).then(r => r.json()).then(d => {
+        if (d.success) alert(d.msg);
+    });
+});
+</script>
+{% endblock %}
